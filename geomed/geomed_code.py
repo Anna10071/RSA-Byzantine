@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from geometric_median import geometric_median
-np.set_printoptions(threshold='nan')
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 
 num_class = 10
 num_feature = 28 * 28
@@ -136,7 +137,7 @@ class Parameter_server:
         self.train_img_bias = train_img_bias
         self.one_train_lbl = one_train_lbl
 
-        samples_per_machine = num_train / num_machines
+        samples_per_machine = int(num_train / num_machines)
 
         self.machines = []
         for i in range(num_machines):
@@ -170,9 +171,9 @@ class Parameter_server:
 
         self.theta_li.append(init_theta)
         acc, _ = cal_acc(self.test_img_bias, self.test_lbl, init_theta)
-        print "init acc:", acc
+        print ("init acc:", acc)
 
-        sample_per_machine = num_train / num_machines
+        sample_per_machine = int(num_train / num_machines)
 
         alpha = 0.00001
         d = 0.00008
@@ -191,7 +192,7 @@ class Parameter_server:
             if (i + 1) % 10 == 0:
                 acc, _ = cal_acc(self.test_img_bias, self.test_lbl, new_theta)
                 self.acc_li.append(acc)
-                print "step:", i, "acc:", acc
+                print ("step:", i, "acc:", acc)
             # print "step:", i, "total_grad_norm:", self.total_grad[-1]
 
     def plot(self):

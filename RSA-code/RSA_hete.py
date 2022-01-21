@@ -2,7 +2,8 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 import time
-np.set_printoptions(threshold='nan')
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 
 num_class = 10   # number of classes
 num_feature = 28 * 28  # number of features
@@ -13,7 +14,7 @@ batch_size = 32
 
 num_iter = 5000  # number of iteration
 exit_byzantine = True
-num_byz = 8  # number of Byzantine workers
+num_byz = 6  # number of Byzantine workers
 
 
 def cal_total_grad(X, Y, theta, weight_lambda):
@@ -159,7 +160,7 @@ class Parameter_server:
             train = np.load(s1)
             label = np.load(s2)
             size = train.shape[0]
-            num1 = size / 2
+            num1 = int(size / 2)
             tmp_bias = np.ones(size)
             train_bias = np.column_stack((train, tmp_bias))
             new_machine1 = Machine(train_bias[0:num1, :], label[0:num1, :], i*2)
@@ -199,7 +200,7 @@ class Parameter_server:
         k = 0
         delta = 0.1
         d = 0.0005
-        start = time.clock()
+        start = time.perf_counter()
         for i in range(num_iter):
             alpha = d / np.sqrt(i + 1)
             rec_theta0, rec_theta = self.broadcast(self.theta0_li[-1], self.theta_li[-1], alpha, l1_lambda, weight_lambda, delta)
@@ -213,11 +214,11 @@ class Parameter_server:
             # # total_grad = cal_total_grad(self.train_img_bias, self.one_train_lbl, rec_theta[0][0],weight_lambda) + weight_lambda * rec_theta[0][0]
             # self.grad_norm.append(np.linalg.norm(total_grad))
             if (i + 1) % 10 == 0:
-                iter_time = time.clock()
+                iter_time = time.perf_counter()
                 self.time_li.append(iter_time - start)
                 acc = cal_acc(self.test_img_bias, self.test_lbl, rec_theta0)
                 self.acc_li.append(acc)
-                print "step:", i, " acc:", acc
+                print ("step:", i, " acc:", acc)
 
             theta_tmp = []
             for k in range(num_machines - num_byz):
